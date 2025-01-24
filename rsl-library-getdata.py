@@ -10,40 +10,50 @@ import json
 # Initialize webdriver
 options = webdriver.FirefoxOptions()
 #options.add_argument("--headless")
-browser = webdriver.Firefox(executable_path="./geckodriver", options=options)
+browser = webdriver.Firefox(options=options) # executable_path="./geckodriver"
 isbn_str = "9785000837801"
-browser.get("https://search.rsl.ru/ru/search#q="+isbn_str)
+browser.get("https://search.rsl.ru/ru/search#q="+isbn_str) # +isbn_str
 
-# Wait for the search results to load
+ # Wait for the search results to load
 element_wait = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "rsl-search-info")))
 
 # Are the results found
 res = browser.find_element(By.CLASS_NAME, "rsl-search-info")
+print(res)
 pattern = r":\s+"
 ind = re.search(pattern, res.text).end()
+print(re.search(pattern, res.text))
+ind = re.search(pattern, res.text).end() + 1
+pattern = r'\d\d?'
+num = re.search(pattern, res.text[ind:])[0]
+print(num)
 
 table_data = {}
 
-if (int(res.text[ind:ind+1]) > 0):
+if (int(num) > 0):
     #если больше 1, то будет разбирать просто первый нашедшийся результат
     element_wait = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "js-item-maininfo")))
 
     # Find and expand description
-    elem = browser.find_element(By.CLASS_NAME, "rsl-itemfooter-link")
+    #rsl-itemaction-link rsl-itemaction-description-link
+    elem = browser.find_element(By.CLASS_NAME, 'rsl-itemaction-link') #"rsl-itemfooter-link"
     desr = elem.find_element(By.TAG_NAME, "a").click()
 
     # Wait for the results to load
     css_sel = "#resultModal .modal-dialog .modal-content .modal-body #w0"
-    element_wait = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, css_sel)))
+    element_wait = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'modal-body')))
 
     # Searching for marc-info
-    info = browser.find_element(By.CSS_SELECTOR, css_sel)
-    list_ = info.find_elements(By.TAG_NAME, "li")
+    info = browser.find_element(By.CLASS_NAME, 'modal-body') # By.CSS_SELECTOR, css_sel
+    print(info)
+    list_ = info.find_elements(By.TAG_NAME, "li").text
+    print(list_)
     last_item = list_[-1]
+    print(last_item)
 
     link = last_item.find_element(By.TAG_NAME, "a")
     link.click()
-
+"""
     # Extract the info
     css_sel = "#resultModal .modal-dialog .modal-content .modal-body .tab-content #tab_marc"
     element_wait = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, css_sel)))
@@ -78,3 +88,4 @@ elif (int(res.text[ind:ind+1]) == 0):
 
 # Close the browser window when done
 # driver.quit()
+  """
