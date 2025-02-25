@@ -18,5 +18,5 @@ def main(isbn):
 
 if __name__ == '__main__':
 
-    isbn_str = "9785000837801"
+    isbn_str = '9785000837801'
     main(isbn_str)
